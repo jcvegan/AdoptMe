@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.0;netstandard2.0;</TargetFrameworks>
+    <Authors>Karla Liliana Aguilar Chuiquipoma</Authors>
+    <Company>Universidad Ricardo Palma</Company>
+    <Product>Tesis</Product>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>AdoptMe.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="6.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.2" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <Reference Include="System.Web" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AdoptMe.Application.DataObjects\AdoptMe.Application.DataObjects.csproj" />
+    <ProjectReference Include="..\AdoptMe.Data.Container\AdoptMe.Data.Container.csproj" />
+    <ProjectReference Include="..\AdoptMe.Data.Domains\AdoptMe.Data.Domains.csproj" />
+    <ProjectReference Include="..\AdoptMe.Data.Repository\AdoptMe.Data.Repository.csproj" />
+  </ItemGroup>
+</Project>

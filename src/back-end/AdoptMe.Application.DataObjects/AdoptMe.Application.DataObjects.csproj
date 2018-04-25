@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.0;netstandard2.0;</TargetFrameworks>
+    <Authors>Karla Liliana Aguilar Chuiquipoma</Authors>
+    <Company>Universidad Ricardo Palma</Company>
+    <Product>Tesis</Product>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>AdoptMe.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+</Project>
