@@ -9,4 +9,7 @@
     <AssemblyOriginatorKeyFile>AdoptMe.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Pets\" />
+  </ItemGroup>
 </Project>

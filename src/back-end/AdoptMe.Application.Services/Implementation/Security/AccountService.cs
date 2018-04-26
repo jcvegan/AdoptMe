@@ -8,10 +8,12 @@
     using AdoptMe.Data.Repository.Definition;
     using AutoMapper;
     using Microsoft.AspNetCore.Identity;
+    using NLog;
 
     public class AccountService : IAccountService
     {
-        private readonly IUnitOfWork uniOfWork;
+        private static Logger log = LogManager.GetCurrentClassLogger();
+        private readonly IUnitOfWork unitOfWork;
 
         //private readonly AdoptMeDataContext dataContext;
         private readonly UserManager<User> userManager;
@@ -19,9 +21,9 @@
         private readonly RoleManager<Role> roleManager;
         private readonly IMapper mapper;
 
-        public AccountService(/*AdoptMeDataContext dataContext*/IUnitOfWork uniOfWork,UserManager<User> userManager,SignInManager<User> signInManager,RoleManager<Role> roleManager,IMapper mapper)
+        public AccountService(/*AdoptMeDataContext dataContext*/IUnitOfWork unitOfWork,UserManager<User> userManager,SignInManager<User> signInManager,RoleManager<Role> roleManager,IMapper mapper)
         {
-            this.uniOfWork = uniOfWork;
+            this.unitOfWork = unitOfWork;
             //this.dataContext = dataContext;
             this.userManager = userManager;
             this.signInManager = signInManager;
@@ -32,7 +34,7 @@
         public async Task<IdentityResult> CreateAccountAsync(UserDto newUser, string password)
         {
             IdentityResult userResult = null;
-            using (var transaction = uniOfWork.BeginTransaction())
+            using (var transaction = unitOfWork.BeginTransaction())
             {
                 try
                 {
@@ -43,12 +45,13 @@
                         var roleResult = await userManager.AddToRoleAsync(user, "Requester");
                     }
                     transaction.Commit();
-                    uniOfWork.Complete();
+                    unitOfWork.Complete();
                 }
                 catch(Exception exc)
                 {
+                    log.Log(LogLevel.Fatal,exc);
                     transaction.Rollback();
-                    uniOfWork.Rollback();
+                    unitOfWork.Rollback();
                 }
             }
             
