@@ -3,7 +3,6 @@
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.0;netstandard2.0;</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
-    <DelaySign>false</DelaySign>
     <AssemblyOriginatorKeyFile>AdoptMe.snk</AssemblyOriginatorKeyFile>
     <Authors>Karla Liliana Aguilar Chuiquipoma</Authors>
     <Company>Universidad Ricardo Palma</Company>

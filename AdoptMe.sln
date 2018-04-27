@@ -5,21 +5,21 @@ VisualStudioVersion = 15.0.27428.2015
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 - Domains", "1 - Domains", "{8FCCB6EA-20A1-46AD-AD42-76B728E188C7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdoptMe.Data.Domains", "src\back-end\AdoptMe.Data.Domains\AdoptMe.Data.Domains.csproj", "{A92BBCE7-5227-42E1-A082-7D31BDC95AA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdoptMe.Data.Domains", "src\back-end\AdoptMe.Data.Domains\AdoptMe.Data.Domains.csproj", "{A92BBCE7-5227-42E1-A082-7D31BDC95AA3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 - Persistence", "2 - Persistence", "{3A500BEE-EE62-42E5-BF6F-9A1F5976CD03}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdoptMe.Data.Repository", "src\back-end\AdoptMe.Data.Repository\AdoptMe.Data.Repository.csproj", "{69B1DE63-B70D-4785-AB2D-1B9283194AA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdoptMe.Data.Repository", "src\back-end\AdoptMe.Data.Repository\AdoptMe.Data.Repository.csproj", "{69B1DE63-B70D-4785-AB2D-1B9283194AA3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdoptMe.Data.Container", "src\back-end\AdoptMe.Data.Container\AdoptMe.Data.Container.csproj", "{FD332689-E8AA-4ACC-8A1B-DCF2C279A136}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdoptMe.Data.Container", "src\back-end\AdoptMe.Data.Container\AdoptMe.Data.Container.csproj", "{FD332689-E8AA-4ACC-8A1B-DCF2C279A136}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 - Application", "3 - Application", "{C7DDEEAE-44CB-4F1E-B09C-09C3DE3FF150}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdoptMe.Application.DataObjects", "src\back-end\AdoptMe.Application.DataObjects\AdoptMe.Application.DataObjects.csproj", "{42008E34-28E4-4078-A472-CCC078523399}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdoptMe.Application.DataObjects", "src\back-end\AdoptMe.Application.DataObjects\AdoptMe.Application.DataObjects.csproj", "{42008E34-28E4-4078-A472-CCC078523399}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AdoptMe.Application.Services", "src\back-end\AdoptMe.Application.Services\AdoptMe.Application.Services.csproj", "{D81AD707-7CEF-4E2A-8622-41AF28C3F858}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdoptMe.Application.Services", "src\back-end\AdoptMe.Application.Services\AdoptMe.Application.Services.csproj", "{D81AD707-7CEF-4E2A-8622-41AF28C3F858}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 - Api", "4 - Api", "{E3759AB2-4E48-49FA-BDE5-EA8D54E22262}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 - Presentation", "4 - Presentation", "{E3759AB2-4E48-49FA-BDE5-EA8D54E22262}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdoptMe.Presentation.Api", "src\back-end\AdoptMe.Presentation.Api\AdoptMe.Presentation.Api.csproj", "{A2281DEC-07F9-4F24-B5F0-BF620557A319}"
 EndProject
