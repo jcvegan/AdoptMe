@@ -4,7 +4,7 @@ import Header from './common/Header';
 class App extends React.Component {
     render(){
         return (
-            <div className="uk-section-transparent">
+            <div className="uk-section-transparen">
                 <Header/>
                 {this.props.children}
             </div>
