@@ -4,9 +4,11 @@ import Header from './common/Header';
 class App extends React.Component {
     render(){
         return (
-            <div className="uk-section-transparen">
+            <div className="uk-section-transparent">
                 <Header/>
-                {this.props.children}
+                <div className="uk-section uk-section-small uk-flex uk-flex-middle uk-text-center">
+                    {this.props.children}
+                </div>
             </div>
         );
     }
