@@ -6,7 +6,7 @@ class App extends React.Component {
         return (
             <div className="uk-section-transparent">
                 <Header/>
-                <div className="uk-section uk-section-small uk-flex uk-flex-middle uk-text-center">
+                <div className="uk-section">
                     {this.props.children}
                 </div>
             </div>
