@@ -7,15 +7,8 @@ class BuscadorPage extends React.Component {
 
     render(){
         return (
-        <div className="uk-container-large">
-            <div className="uk-grid">
-                <div className="uk-grid-1-3">
-                    
-                </div>
-                <div className="uk-grid-1-3">
-
-                </div>
-            </div>
+        <div className="tm-sidebar-left uk-visible@m">
+            <h3>Buscador</h3>
         </div>
         );
     }

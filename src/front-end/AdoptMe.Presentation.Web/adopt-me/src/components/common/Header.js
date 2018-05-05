@@ -3,6 +3,8 @@ import {Link,IndexLink} from 'react-router';
 import UIKit from '../../../node_modules/uikit/dist/js/uikit';
 import UIKitIcons from '../../../node_modules/uikit/dist/js/uikit-icons';
 import LogIn from '../security/LoginView';
+import FontAwesomeIcon from '@fortawesome/react-fontawesome';
+import { faCoffee,faPaw } from '@fortawesome/fontawesome-free-solid';
 
 const Header = () => {
     return (
@@ -14,7 +16,7 @@ const Header = () => {
                             <li><Link to="/buscador" activeClassName="active">Buscador</Link></li>
                         </ul>
                     </div>
-                    <IndexLink to="/" className="uk-navbar-item uk-logo">ADOPTAME</IndexLink>
+                    <IndexLink to="/" className="uk-navbar-item uk-logo"><FontAwesomeIcon icon={faPaw} /> Adoptame</IndexLink>
                     <div className="uk-navbar-center-right">
                         <LogIn/>
                     </div>
