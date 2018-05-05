@@ -4,7 +4,8 @@ import Header from './common/Header';
 class App extends React.Component {
     render(){
         return (
-            <div className="uk-section-transparent">
+            
+            <div className="uk-offcanvas-content">
                 <Header/>
                 <div className="uk-container-large" uk-height-viewport="offset-bottom:true">
                     {this.props.children}
