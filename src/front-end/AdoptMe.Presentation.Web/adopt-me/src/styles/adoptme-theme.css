@@ -1,3 +1,6 @@
 .bg-pet-1 {
-    background: url('../img/adorable-animal-beautiful-464664.jpg') #FFFFFF no-repeat fixed;
+    background: url('../img/adorable-animal-beautiful-464664.jpg');
+}
+.bg-pet-landing {
+    background: url('../img/animal-be-free.jpg') #ffffff;
 }

@@ -6,7 +6,7 @@ class App extends React.Component {
         return (
             <div className="uk-section-transparent">
                 <Header/>
-                <div className="uk-section">
+                <div className="uk-container-large" uk-height-viewport="offset-bottom:true">
                     {this.props.children}
                 </div>
             </div>
