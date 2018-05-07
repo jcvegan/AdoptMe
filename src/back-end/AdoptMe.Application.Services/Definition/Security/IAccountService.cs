@@ -7,5 +7,7 @@
     public interface IAccountService
     {
         Task<IdentityResult> CreateAccountAsync(UserDto user, string password);
+        Task<bool> ExistsUserNameAsync(string userName);
+        Task<bool> IsEmailAssociatedAsync(string eMail);
     }
 }

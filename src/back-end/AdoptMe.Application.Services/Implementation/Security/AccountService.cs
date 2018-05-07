@@ -42,7 +42,7 @@
                     userResult = await userManager.CreateAsync(user, password);
                     if (userResult.Succeeded)
                     {
-                        var roleResult = await userManager.AddToRoleAsync(user, "Requester");
+                        var roleResult = await userManager.AddToRoleAsync(user, "Default User");
                     }
                     transaction.Commit();
                     unitOfWork.Complete();
@@ -56,6 +56,18 @@
             }
             
             return userResult;
+        }
+
+        public async Task<bool> ExistsUserNameAsync(string userName)
+        {
+            var user = await userManager.FindByNameAsync(userName);
+            return user != null;
+        }
+
+        public async Task<bool> IsEmailAssociatedAsync(string eMail)
+        {
+            var user = await userManager.FindByEmailAsync(eMail);
+            return user != null;
         }
     }
 }

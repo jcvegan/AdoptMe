@@ -35,7 +35,14 @@
 
         public IDbContextTransaction BeginTransaction()
         {
-            return context.Database.BeginTransaction();
+            try
+            {
+                return context.Database.BeginTransaction();
+            }
+            catch(Exception exc)
+            {
+                throw exc;
+            }
         }
     }
 }
