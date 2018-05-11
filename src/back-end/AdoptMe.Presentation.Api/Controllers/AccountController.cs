@@ -3,12 +3,17 @@
     using AdoptMe.Application.DataObjects.Security;
     using AdoptMe.Application.Services.Definition.Security;
     using AdoptMe.Data.Domains.Security;
+    using AdoptMe.Presentation.Api.Auth;
+    using AdoptMe.Presentation.Api.Helpers;
     using AdoptMe.Presentation.Api.Models.Account;
+    using AdoptMe.Presentation.Api.Options;
     using AutoMapper;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Options;
     using Microsoft.IdentityModel.Tokens;
+    using Newtonsoft.Json;
     using System;
     using System.Collections.Generic;
     using System.IdentityModel.Tokens.Jwt;
@@ -24,14 +29,18 @@
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
         private readonly IConfiguration configuration;
+        private readonly IJwtFactory _jwtFactory;
+        private readonly JwtIssuerOptions _jwtOptions;
 
-        public AccountController(IAccountService accountService, IMapper mapper,UserManager<User> userManager,SignInManager<User> signInManager, IConfiguration configuration)
+        public AccountController(IAccountService accountService, IMapper mapper,UserManager<User> userManager,SignInManager<User> signInManager, IConfiguration configuration, IJwtFactory jwtFactory, IOptions<JwtIssuerOptions> jwtOptions)
         {
             this.accountService = accountService;
             this.mapper = mapper;
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.configuration = configuration;
+            _jwtFactory = jwtFactory;
+            _jwtOptions = jwtOptions.Value;
         }
 
         [Route("create")]
@@ -84,53 +93,86 @@
         [HttpPost]
         public async Task<IActionResult> LogIn([FromBody]LogInModel model)
         {
-            if (ModelState.IsValid)
-            {
-                var user = await userManager.FindByNameAsync(model.Username);
-                if(user != null)
+            //if (ModelState.IsValid)
+            //{
+                if (!ModelState.IsValid)
                 {
-                    if(!await signInManager.CanSignInAsync(user) && (userManager.SupportsUserLockout && await userManager.IsLockedOutAsync(user))){
-                        return BadRequest();
-                    }
-                    if (!await userManager.CheckPasswordAsync(user, model.Password))
-                    {
-                        // Return bad request if the password is invalid
-                        return BadRequest();
-                    }
-                    if (userManager.SupportsUserLockout)
-                    {
-                        await userManager.ResetAccessFailedCountAsync(user);
-                    }
-
-                    //var principal = await signInManager.CreateUserPrincipalAsync(user);
-
-                    List<Claim> claims = new List<Claim>()
-                    {
-                        new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                        new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                    };
-
-                    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
-                    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-                    DateTime expiresOn = DateTime.Now.AddDays(1);
-                    var token = new JwtSecurityToken(configuration["Jwt:Issuer"],
-                      configuration["Jwt:Issuer"],
-                      claims,
-                      expires: expiresOn,
-                      signingCredentials: creds);
-                    return new ObjectResult(new { Token= new JwtSecurityTokenHandler().WriteToken(token), Expires = expiresOn });
+                    return BadRequest(ModelState);
                 }
-                else
+
+                var identity = await GetClaimsIdentity(model.Username, model.Password);
+                if (identity == null)
                 {
-                    return BadRequest();
+                    return BadRequest(Errors.AddErrorToModelState("login_failure", "Invalid username or password.", ModelState));
                 }
-            }
-            else
+
+                var jwt = await Tokens.GenerateJwt(identity, _jwtFactory, model.Username, _jwtOptions, new JsonSerializerSettings { Formatting = Formatting.Indented });
+                return new OkObjectResult(jwt);
+            //    var user = await userManager.FindByNameAsync(model.Username);
+            //    if(user != null)
+            //    {
+            //        if(!await signInManager.CanSignInAsync(user) && (userManager.SupportsUserLockout && await userManager.IsLockedOutAsync(user))){
+            //            return BadRequest();
+            //        }
+            //        if (!await userManager.CheckPasswordAsync(user, model.Password))
+            //        {
+            //            // Return bad request if the password is invalid
+            //            return BadRequest();
+            //        }
+            //        if (userManager.SupportsUserLockout)
+            //        {
+            //            await userManager.ResetAccessFailedCountAsync(user);
+            //        }
+
+            //        //var principal = await signInManager.CreateUserPrincipalAsync(user);
+
+            //        List<Claim> claims = new List<Claim>()
+            //        {
+            //            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+            //            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            //            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            //        };
+
+            //        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
+            //        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            //        DateTime expiresOn = DateTime.Now.AddDays(1);
+            //        var token = new JwtSecurityToken(configuration["Jwt:Issuer"],
+            //          configuration["Jwt:Issuer"],
+            //          claims,
+            //          expires: expiresOn,
+            //          signingCredentials: creds);
+            //        return new ObjectResult(new { Token= new JwtSecurityTokenHandler().WriteToken(token), Expires = expiresOn });
+            //    }
+            //    else
+            //    {
+            //        return BadRequest();
+            //    }
+            //}
+            //else
+            //{
+            //    return BadRequest();
+            //}
+        }
+
+        private async Task<ClaimsIdentity> GetClaimsIdentity(string userName, string password)
+        {
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+                return await Task.FromResult<ClaimsIdentity>(null);
+
+            // get the user to verifty
+            var userToVerify = await userManager.FindByNameAsync(userName);
+
+            if (userToVerify == null) return await Task.FromResult<ClaimsIdentity>(null);
+
+            // check the credentials
+            if (await userManager.CheckPasswordAsync(userToVerify, password))
             {
-                return BadRequest();
+                return await Task.FromResult(_jwtFactory.GenerateClaimsIdentity(userName, userToVerify.Id));
             }
+
+            // Credentials are invalid, or account doesn't exist
+            return await Task.FromResult<ClaimsIdentity>(null);
         }
     }
 }

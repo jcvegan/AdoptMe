@@ -23,7 +23,6 @@
     <ProjectReference Include="..\AdoptMe.Data.Repository\AdoptMe.Data.Repository.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Definition\Pets\" />
-    <Folder Include="Implementation\Pets\" />
+    <Folder Include="Templates\Base\" />
   </ItemGroup>
 </Project>

@@ -10,11 +10,13 @@
         private readonly AdoptMeDataContext context;
 
         public IPetRepository Pets { get; private set; }
+        public IPetTypeRepository PetTypes { get; private set; }
 
         public UnitOfWork(AdoptMeDataContext context)
         {
             this.context = context;
             Pets = new PetRepository(context);
+            PetTypes = new PetTypeRepository(context);
         }
 
         public void Complete()

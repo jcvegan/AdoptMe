@@ -11,6 +11,7 @@
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public DateTime? BirthDate { get; set; }
+        public bool IsEnabled { get; set; }
 
         public string FullName => $"{FirstName} {LastName}".Trim();
 

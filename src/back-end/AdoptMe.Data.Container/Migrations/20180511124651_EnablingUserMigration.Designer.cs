@@ -12,9 +12,10 @@ using System;
 namespace AdoptMe.Data.Container.Migrations
 {
     [DbContext(typeof(AdoptMeDataContext))]
-    partial class AdoptMeDataContextModelSnapshot : ModelSnapshot
+    [Migration("20180511124651_EnablingUserMigration")]
+    partial class EnablingUserMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

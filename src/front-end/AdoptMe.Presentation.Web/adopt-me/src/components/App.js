@@ -6,7 +6,7 @@ class App extends React.Component {
         return (
             <div className="uk-offcanvas-content">
                 <Header/>
-                <div className="uk-container-large">
+                <div className="uk-section uk-padding-remove">
                     {this.props.children}
                 </div>
             </div>
