@@ -1,11 +1,14 @@
-import React, {PropTypes} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
-import * as petTypesFetchAction from '../../actions/petTypesActions';
+import {bindActionCreators} from 'redux';
+import * as petTypesActions from '../../actions/petTypesActions';
+import PetTypesSelectorView from '../buscador/petTypesSelectorView';
 
 class BuscadorPage extends React.Component {
     constructor(props,context){
         super(props,context);
-        this.state = {
+        /*this.state = {
             petTypeList: {
                 petTypes:{
                     petTypes:[],
@@ -13,45 +16,39 @@ class BuscadorPage extends React.Component {
                     error:''
                 }
             }
-        };
+        };*/
     }
 
     componentDidMount(){
-        this.props.fetchAllPetTypes();
     }
     
-
     render(){
         return (
         <div className="uk-section uk-padding-remove" data-uk-height-viewport="offset-top: true">
-            <div className="uk-container-large"></div>
+            <div className="uk-container-large">
+                <div className="uk-grid-collapse uk-grid-divider uk-child-width-expand@s" data-uk-grid>
+                    <div className="uk-width-1-3@m">
+                            <h3>Buscador</h3>
+                            <PetTypesSelectorView petTypes={this.props.petTypes} />
+                    </div>
+                </div>
+            </div>
         </div>
         );
     }
 }
 BuscadorPage.propTypes = {
-    fetchAllPetTypes: PropTypes.func.isRequired
+    petTypes:PropTypes.array.isRequired
 };
 
-function mapStateToProps(state,ownProps){
+function mapStateToProps(state, ownProps){
     return {
-        petTypeList:state.petTypeList
+        petTypes: state.petTypes
     };
 }
-
-function mapDispatchToProps(dispatch){
+function mapDispacthToProps(dispatch){
     return {
-        fetchAllPetTypes:() => dispatch(petTypesFetchAction.fetchAllPetTypes())
+        actions:bindActionCreators(petTypesActions,dispatch)
     };
 }
-export default connect(mapStateToProps,mapDispatchToProps)(BuscadorPage);
-/*
-const GetPetTypes = () =>{
-    return fetch("http://localhost:52176/api/pet/types").then(response => {
-        return response.json();
-    }).catch(error => {
-        throw error;
-    });
-};
-
-*/
+export default connect(mapStateToProps,mapDispacthToProps)(BuscadorPage);

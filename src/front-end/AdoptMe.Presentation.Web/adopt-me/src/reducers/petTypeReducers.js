@@ -1,9 +1,9 @@
-export default function petTypeReducer(state = [],action){
+import * as types from '../actions/actionTypes';
+
+export default function petTypesReducer(state = [],action){
     switch(action.type){
-        case 'FETCH_PET_TYPES':
-            return [...state, Object.assign({},{petTypeList:{ petTypes: [], error: null, loading: true }})] ;
-        case 'FETCH_PET_TYPES_SUCCEED':
-            return;
+        case types.LOAD_PETTYPES_SUCCESS:
+            return Object.assign({},{isFetching:action.isFetching,petTypes:action.petTypes});
         default:
             return state;
     }

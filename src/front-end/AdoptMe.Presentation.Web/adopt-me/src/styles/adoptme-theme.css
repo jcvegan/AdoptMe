@@ -5,3 +5,23 @@
     background: url('../img/animal-be-free.jpg') no-repeat fixed;
     background-size: cover;
 }
+.bg-pet-about-1{
+    background:url('../img/adorable-animal-breed-731022.jpg') no-repeat fixed;
+    size:cover;
+}
+.bg-pet-about-2 {
+    background: url('../img/adorable-animal-canine-134392.jpg') no-repeat fixed;
+    size:cover;
+}
+.bg-pet-about-3 {
+    background: url('../img/animal-animal-photography-animal-portrait-422220.jpg') no-repeat fixed;
+    size:cover;
+}
+.bg-pet-about-4 {
+    background: url('../img/animal-be-free.jpg') no-repeat fixed;
+    size:cover;
+}
+.bg-pet-about-5 {
+    background: url('../img/animal-dog-golden-retriever-9080.jpg') no-repeat fixed;
+    size:cover;
+}

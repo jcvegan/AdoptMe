@@ -17,7 +17,7 @@
 
         
         [Route("register")]
-        [Authorize(Policy = "ApiUser")]
+        [Authorize()]
         [HttpPost]
         public IActionResult Create([FromBody]NewPetModel model)
         {

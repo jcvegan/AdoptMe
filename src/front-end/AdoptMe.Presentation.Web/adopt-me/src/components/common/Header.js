@@ -16,7 +16,7 @@ const Header = () => {
                             <li><Link to="/buscador" activeClassName="active">Buscador</Link></li>
                         </ul>
                     </div>
-                    <IndexLink to="/" className="uk-navbar-item uk-logo"><FontAwesomeIcon icon={faPaw} /> Adoptame</IndexLink>
+                    <IndexLink to="/" className="uk-navbar-item uk-logo"><FontAwesomeIcon size="2x" icon={faPaw} /> Adoptame</IndexLink>
                     <div className="uk-navbar-center-right uk-visible@m">
                         <LogIn inNav/>
                     </div>

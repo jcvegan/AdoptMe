@@ -2,45 +2,43 @@
 {
     using AdoptMe.Application.DataObjects.Security;
     using AdoptMe.Application.Services.Definition.Security;
+    using AdoptMe.Data.Container.Context;
     using AdoptMe.Data.Domains.Security;
     using AdoptMe.Presentation.Api.Auth;
-    using AdoptMe.Presentation.Api.Helpers;
     using AdoptMe.Presentation.Api.Models.Account;
     using AdoptMe.Presentation.Api.Options;
+    using AdoptMe.Presentation.Api.Utils;
     using AutoMapper;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Options;
-    using Microsoft.IdentityModel.Tokens;
-    using Newtonsoft.Json;
     using System;
-    using System.Collections.Generic;
-    using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
-    using System.Text;
     using System.Threading.Tasks;
 
     [Route("api/account")]
+    [Produces("application/json")]
+    [AllowAnonymous]
     public class AccountController : Controller
     {
+        private readonly AdoptMeDataContext context;
         private readonly IAccountService accountService;
         private readonly IMapper mapper;
         private readonly UserManager<User> userManager;
         private readonly SignInManager<User> signInManager;
         private readonly IConfiguration configuration;
-        private readonly IJwtFactory _jwtFactory;
-        private readonly JwtIssuerOptions _jwtOptions;
 
-        public AccountController(IAccountService accountService, IMapper mapper,UserManager<User> userManager,SignInManager<User> signInManager, IConfiguration configuration, IJwtFactory jwtFactory, IOptions<JwtIssuerOptions> jwtOptions)
+        public AccountController(AdoptMeDataContext context, IAccountService accountService, IMapper mapper,UserManager<User> userManager,SignInManager<User> signInManager, IConfiguration configuration)
         {
+            this.context = context;
             this.accountService = accountService;
             this.mapper = mapper;
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.configuration = configuration;
-            _jwtFactory = jwtFactory;
-            _jwtOptions = jwtOptions.Value;
         }
 
         [Route("create")]
@@ -99,15 +97,21 @@
                 {
                     return BadRequest(ModelState);
                 }
+            var user = await userManager.Users.SingleAsync(i => i.UserName == model.Username);
+            var response = GetLoginToken.Execute(user, context);
+            return Ok(response);
 
-                var identity = await GetClaimsIdentity(model.Username, model.Password);
-                if (identity == null)
-                {
-                    return BadRequest(Errors.AddErrorToModelState("login_failure", "Invalid username or password.", ModelState));
-                }
+            //COMENTADO 2
+            //var identity = await GetClaimsIdentity(model.Username, model.Password);
+            //if (identity == null)
+            //{
+            //    return BadRequest(Errors.AddErrorToModelState("login_failure", "Invalid username or password.", ModelState));
+            //}
 
-                var jwt = await Tokens.GenerateJwt(identity, _jwtFactory, model.Username, _jwtOptions, new JsonSerializerSettings { Formatting = Formatting.Indented });
-                return new OkObjectResult(jwt);
+            //var jwt = await Tokens.GenerateJwt(identity, _jwtFactory, model.Username, _jwtOptions, new JsonSerializerSettings { Formatting = Formatting.Indented });
+            //return new OkObjectResult(jwt);
+
+            ///comentado 1
             //    var user = await userManager.FindByNameAsync(model.Username);
             //    if(user != null)
             //    {
@@ -155,24 +159,24 @@
             //}
         }
 
-        private async Task<ClaimsIdentity> GetClaimsIdentity(string userName, string password)
-        {
-            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
-                return await Task.FromResult<ClaimsIdentity>(null);
+        //private async Task<ClaimsIdentity> GetClaimsIdentity(string userName, string password)
+        //{
+        //    if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+        //        return await Task.FromResult<ClaimsIdentity>(null);
 
-            // get the user to verifty
-            var userToVerify = await userManager.FindByNameAsync(userName);
+        //    // get the user to verifty
+        //    var userToVerify = await userManager.FindByNameAsync(userName);
 
-            if (userToVerify == null) return await Task.FromResult<ClaimsIdentity>(null);
+        //    if (userToVerify == null) return await Task.FromResult<ClaimsIdentity>(null);
 
-            // check the credentials
-            if (await userManager.CheckPasswordAsync(userToVerify, password))
-            {
-                return await Task.FromResult(_jwtFactory.GenerateClaimsIdentity(userName, userToVerify.Id));
-            }
+        //    // check the credentials
+        //    if (await userManager.CheckPasswordAsync(userToVerify, password))
+        //    {
+        //        return await Task.FromResult(_jwtFactory.GenerateClaimsIdentity(userName, userToVerify.Id));
+        //    }
 
-            // Credentials are invalid, or account doesn't exist
-            return await Task.FromResult<ClaimsIdentity>(null);
-        }
+        //    // Credentials are invalid, or account doesn't exist
+        //    return await Task.FromResult<ClaimsIdentity>(null);
+        //}
     }
 }

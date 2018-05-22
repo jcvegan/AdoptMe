@@ -9,8 +9,9 @@
     using AdoptMe.Data.Domains.Security;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
+    using System.Linq;
 
-    public class AdoptMeDataContext : IdentityDbContext<User,Role,string>, IAdoptMeDataContext
+    public class AdoptMeDataContext : IdentityDbContext<User, Role, string>, IAdoptMeDataContext
     {
         public AdoptMeDataContext(DbContextOptions<AdoptMeDataContext> options) : base(options)
         {
@@ -22,6 +23,19 @@
         public DbSet<Pet> Pets { get; set; }
         public DbSet<PetType> PetTypes { get; set; }
         public DbSet<Photo> Photos { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
+        public void InsertNew(RefreshToken token)
+        {
+            var tokenModel = RefreshTokens.SingleOrDefault(i => i.UserId == token.UserId);
+            if (tokenModel != null)
+            {
+                RefreshTokens.Remove(tokenModel);
+                SaveChanges();
+            }
+            RefreshTokens.Add(token);
+            SaveChanges();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,6 +47,7 @@
             modelBuilder.ApplyConfiguration(new PhotoEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new RoleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UserEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new RefreshTokenEntityTypeConfiguration());
         }
     }
 }

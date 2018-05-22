@@ -161,6 +161,37 @@ namespace AdoptMe.Data.Container.Migrations
                     b.ToTable("Photos","Pets");
                 });
 
+            modelBuilder.Entity("AdoptMe.Data.Domains.Security.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<DateTime>("ExpiresUtc");
+
+                    b.Property<DateTime>("IssuedUtc");
+
+                    b.Property<string>("Token")
+                        .IsRequired();
+
+                    b.Property<string>("UserId")
+                        .IsRequired();
+
+                    b.Property<string>("UserId1");
+
+                    b.HasKey("Id");
+
+                    b.HasAlternateKey("Token")
+                        .HasName("RefreshToken_Token");
+
+
+                    b.HasAlternateKey("UserId")
+                        .HasName("RefreshToken_UserId");
+
+                    b.HasIndex("UserId1");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("AdoptMe.Data.Domains.Security.Role", b =>
                 {
                     b.Property<string>("Id")
@@ -410,6 +441,13 @@ namespace AdoptMe.Data.Container.Migrations
                         .WithMany("Photos")
                         .HasForeignKey("PetId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("AdoptMe.Data.Domains.Security.RefreshToken", b =>
+                {
+                    b.HasOne("AdoptMe.Data.Domains.Security.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -4,6 +4,7 @@
     using System;
     using System.Net;
     using System.Text;
+    using System.Threading.Tasks;
     using AdoptMe.Application.Services.Definition.Pets;
     using AdoptMe.Application.Services.Definition.Security;
     using AdoptMe.Application.Services.Implementation.Pets;
@@ -15,6 +16,7 @@
     using AdoptMe.Presentation.Api.Auth;
     using AdoptMe.Presentation.Api.Helpers;
     using AdoptMe.Presentation.Api.Options;
+    using AdoptMe.Presentation.Api.Provider;
     using AutoMapper;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
     using Microsoft.AspNetCore.Builder;
@@ -33,8 +35,8 @@
 
     public class Startup
     {
-        private const string SecretKey = "iNivDmHLpUA223sqsfhqGbMRdRj1PVkH"; // todo: get this from somewhere secure
-        private readonly SymmetricSecurityKey _signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SecretKey));
+        //private const string SecretKey = "iNivDmHLpUA223sqsfhqGbMRdRj1PVkH"; // todo: get this from somewhere secure
+        //private readonly SymmetricSecurityKey _signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SecretKey));
 
         public Startup(IConfiguration configuration)
         {
@@ -46,58 +48,120 @@
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<AdoptMeDataContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("AdoptMe"), opts => opts.CommandTimeout(90)));
-            services.AddSingleton<IJwtFactory, JwtFactory>();
-            services.TryAddTransient<IHttpContextAccessor, HttpContextAccessor>();
-
-            var jwtAppSettingOptions = Configuration.GetSection(nameof(JwtIssuerOptions));
-
-            // Configure JwtIssuerOptions
-            services.Configure<JwtIssuerOptions>(options =>
-            {
-                options.Issuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
-                options.Audience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)];
-                options.SigningCredentials = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
+            ConfigureCors(services);
+            ConfigureAuthorization(services);
+            ConfigureIdentity(services);
+            //ConfigureEntityFramework(services);
+            services.ConfigureApplicationCookie(options => {
+                options.Events.OnRedirectToLogin = context => {
+                    context.Response.Headers["Location"] = context.RedirectUri;
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                };
             });
+            ConfigureAuthentication(services);
 
-            var tokenValidationParameters = new TokenValidationParameters
+            services.AddAutoMapper();
+            ConfigureDependencyInjection(services);
+            services.AddMvc();
+            services.Configure<MvcOptions>(options =>
             {
-                ValidateIssuer = true,
-                ValidIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)],
-
-                ValidateAudience = true,
-                ValidAudience = jwtAppSettingOptions[nameof(JwtIssuerOptions.Audience)],
-
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = _signingKey,
-
-                RequireExpirationTime = false,
-                ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
-            };
-
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
-            }).AddJwtBearer(configureOptions =>
-            {
-                configureOptions.ClaimsIssuer = jwtAppSettingOptions[nameof(JwtIssuerOptions.Issuer)];
-                configureOptions.TokenValidationParameters = tokenValidationParameters;
-                configureOptions.SaveToken = true;
+                options.Filters.Add(new CorsAuthorizationFilterFactory("AllowSpecificOrigin"));
             });
+        }
 
-            // api user claim policy
+        private void ConfigureCors(IServiceCollection services)
+        {
+            services.AddCors(options => {
+                options.AddPolicy("AllowSpecificOrigin", corsBuilder => {
+                    corsBuilder.WithOrigins("http://localhost:3000")
+                               .AllowAnyMethod()
+                               .AllowAnyHeader().AllowCredentials();
+                });
+            });
+            //services.AddCors(options =>
+            //{
+            //    options.AddPolicy("CorsPolicy", builder =>
+            //    {
+            //        builder.AllowAnyHeader()
+            //        .AllowAnyMethod()
+            //        .AllowAnyOrigin()
+            //        .AllowCredentials();
+            //    });
+            //});
+        }
+        private void ConfigureAuthorization(IServiceCollection services)
+        {
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("ApiUser", policy => policy.RequireClaim(Strings.JwtClaimIdentifiers.Rol, Strings.JwtClaims.ApiAccess));
+                options.AddPolicy("UserManagement", policy => policy.RequireClaim(Utils.Extensions.ManageUserClaim));
+                options.AddPolicy("Admin", policy => policy.RequireClaim(Utils.Extensions.AdminClaim));
+                options.AddPolicy("User", policy => policy.RequireClaim(Utils.Extensions.UserClaim));
+                options.AddPolicy("RequireAdministratorRole", policy => policy.RequireRole(Utils.Extensions.AdminRole));
             });
-
-            // add identity
-            var builder = services.AddIdentity<User,Role>(options =>
+        }
+        private void ConfigureEntityFramework(IServiceCollection services)
+        {
+            services.AddIdentity<User, IdentityRole>(options =>
             {
-                // configure identity options
+                options.Password.RequireNonAlphanumeric = false;
+            })
+            .AddEntityFrameworkStores<AdoptMeDataContext>()
+            .AddDefaultTokenProviders();
+            services.AddDbContext<AdoptMeDataContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("AdoptMe"), opts => opts.CommandTimeout(90)));
+        }
+        private void ConfigureAuthentication(IServiceCollection services)
+        {
+            services.AddAuthentication(sharedOptions =>
+            {
+                sharedOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                sharedOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                      .AddJwtBearer(cfg =>
+                      {
+                          cfg.RequireHttpsMetadata = false;
+                          cfg.SaveToken = true;
+
+                          cfg.TokenValidationParameters = new TokenValidationParameters()
+                          {
+                              ValidateIssuer = true,
+                              ValidateAudience = true,
+                              ValidateLifetime = true,
+                              ValidateIssuerSigningKey = true,
+                              ValidIssuer = Configuration["TokenAuthentication:Issuer"],
+                              ValidAudience = Configuration["TokenAuthentication:Audience"],
+                              IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["TokenAuthentication:SecretKey"]))
+                          };
+
+                          cfg.Events = new JwtBearerEvents
+                          {
+                              OnAuthenticationFailed = context =>
+                              {
+                                  Console.WriteLine("OnAuthenticationFailed: " +
+                                      context.Exception.Message);
+                                  return Task.CompletedTask;
+                              },
+                              OnTokenValidated = context =>
+                              {
+                                  Console.WriteLine("OnTokenValidated: " +
+                                      context.SecurityToken);
+                                  return Task.CompletedTask;
+                              }
+                          };
+
+                      });
+        }
+        private void ConfigureDependencyInjection(IServiceCollection services)
+        {
+            services.TryAddTransient<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddTransient<IUnitOfWork, UnitOfWork>();
+            services.AddTransient<IAccountService, AccountService>();
+            services.AddTransient<IPetTypeService, PetTypeService>();
+        }
+        private void ConfigureIdentity(IServiceCollection services)
+        {
+            services.AddIdentity<User, Role>(options =>
+            {
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 8;
                 options.Password.RequireNonAlphanumeric = false;
@@ -111,90 +175,11 @@
                 options.Lockout.AllowedForNewUsers = true;
 
                 options.User.RequireUniqueEmail = true;
-            });
-            builder = new IdentityBuilder(builder.UserType, typeof(Role), builder.Services);
-            builder.AddEntityFrameworkStores<AdoptMeDataContext>().AddDefaultTokenProviders();
-
-            services.AddAutoMapper();
-            //services.AddIdentity<User, Role>().AddEntityFrameworkStores<AdoptMeDataContext>().AddDefaultTokenProviders();
-            //services.Configure<IdentityOptions>(options =>
-            //{
-            //    // Password settings
-            //    options.Password.RequireDigit = true;
-            //    options.Password.RequiredLength = 8;
-            //    options.Password.RequireNonAlphanumeric = false;
-            //    options.Password.RequireUppercase = true;
-            //    options.Password.RequireLowercase = false;
-            //    options.Password.RequiredUniqueChars = 6;
-
-            //    // Lockout settings
-            //    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
-            //    options.Lockout.MaxFailedAccessAttempts = 10;
-            //    options.Lockout.AllowedForNewUsers = true;
-
-            //    // User settings
-            //    options.User.RequireUniqueEmail = true;
-            //});
-
-            //services.ConfigureApplicationCookie(options =>
-            //{
-            //    // Cookie settings
-            //    options.Cookie.HttpOnly = true;
-            //    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-            //    // If the LoginPath isn't set, ASP.NET Core defaults 
-            //    // the path to /Account/Login.
-            //    options.LoginPath = "/Account/Login";
-            //    // If the AccessDeniedPath isn't set, ASP.NET Core defaults 
-            //    // the path to /Account/AccessDenied.
-            //    options.AccessDeniedPath = "/Account/AccessDenied";
-            //    options.SlidingExpiration = true;
-            //});
-
-
-
-            services.AddTransient<IUnitOfWork, UnitOfWork>();
-            services.AddTransient<IAccountService, AccountService>();
-            services.AddTransient<IPetTypeService, PetTypeService>();
-            //services.AddAutoMapper();
-
-            //services.AddAuthentication(options => {
-            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            //}).AddJwtBearer(configureOptions => {
-            //    configureOptions.ClaimsIssuer = Configuration["Jwt:Issuer"];
-            //    configureOptions.TokenValidationParameters = new TokenValidationParameters
-            //    {
-            //        ValidateIssuer = true,
-            //        ValidIssuer = Configuration["Jwt:Issuer"],
-
-            //        ValidateAudience = true,
-            //        ValidAudience = Configuration["Jwt:Issuer"],
-
-            //        RequireExpirationTime = false,
-            //        ValidateLifetime = true,
-            //        ClockSkew = TimeSpan.Zero,
-
-            //        ValidateIssuerSigningKey = true,
-            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"]))
-            //    };
-            //    configureOptions.SaveToken = true;
-            //});
-            //services.AddAuthorization(options =>
-            //{
-            //    options.AddPolicy("ApiUser", policy => policy.RequireClaim(Strings.JwtClaimIdentifiers.Rol, Strings.JwtClaims.ApiAccess));
-            //});
-            services.AddCors(options=> {
-                options.AddPolicy("AllowSpecificOrigin", corsBuilder => {
-                    corsBuilder.WithOrigins("http://localhost:3000").WithMethods("GET", "POST","PUT","DELETE", "HEAD");
-                });
-            });
-            services.AddMvc();
-            services.Configure<MvcOptions>(options =>
-            {
-                options.Filters.Add(new CorsAuthorizationFilterFactory("AllowSpecificOrigin"));
-            });
+            })
+            .AddEntityFrameworkStores<AdoptMeDataContext>()
+            .AddDefaultTokenProviders();
+            services.AddDbContext<AdoptMeDataContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("AdoptMe"), opts => opts.CommandTimeout(90)));
         }
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
@@ -219,6 +204,7 @@
                             }
                         });
           });
+            app.UseMiddleware<TokenProviderMiddleware>();
             app.UseAuthentication();
             app.UseDefaultFiles();
             app.UseStaticFiles();

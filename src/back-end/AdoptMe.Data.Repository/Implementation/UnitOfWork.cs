@@ -32,7 +32,7 @@
 
         public void Rollback()
         {
-            throw new System.NotImplementedException();
+            //TODO
         }
 
         public IDbContextTransaction BeginTransaction()
