@@ -1,0 +1,13 @@
+﻿namespace AdoptMe.Presentation.Api.Models.Account
+{
+    public class LoginResponseData
+    {
+        public string access_token { get; set; }
+        public string refresh_token { get; set; }
+        public int expires_in { get; set; }
+        public string userName { get; set; }
+        public string firstName { get; set; }
+        public string lastName { get; set; }
+        public bool isAdmin { get; set; }
+    }
+}

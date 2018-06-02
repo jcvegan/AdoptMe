@@ -7,7 +7,7 @@
 
     public interface IEmailService
     {
-        Task NotifyByEmail(string subject, IEnumerable<MailAddress> to, string emailTemplatePath, XDocument parameters);
-        Task NotifyByEmail(string subject, IEnumerable<MailAddress> to,MailAddress from, string emailTemplatePath, XDocument parameters);
+        Task NotifyByEmail(string subject, IEnumerable<MailAddress> to, string templateName, XDocument parameters);
+        Task NotifyByEmail(string subject, IEnumerable<MailAddress> to,MailAddress from, string templateName, XDocument parameters);
     }
 }

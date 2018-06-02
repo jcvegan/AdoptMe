@@ -1,5 +1,6 @@
 import React, {PropTypes} from 'react';
 import {connect} from 'react-redux';
+import uikit from '../../../node_modules/uikit/dist/js/uikit';
 import * as accountActions from '../../actions/accountActions';
 
 class NewAccountPage extends React.Component {
@@ -123,7 +124,11 @@ function mapStateToProps(state,ownProps){
 }
 function mapDispatchToProps(dispatch){
     return {
-        createAccount : account => dispatch(accountActions.createAccount(account))
+        createAccount : account => { 
+            console.log(account);
+            uikit.notification("Creando cuenta...",{status:"primary"});
+            dispatch(accountActions.createAccount(account));
+        }
     };
 }
 export default connect(mapStateToProps,mapDispatchToProps)(NewAccountPage);

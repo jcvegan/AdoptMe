@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using AdoptMe.Application.DataObjects.Security;
+    using AdoptMe.Application.Services.Definition.App;
     using AdoptMe.Application.Services.Definition.Security;
     using AdoptMe.Data.Domains.Security;
     using AdoptMe.Data.Repository.Definition;
@@ -13,6 +14,7 @@
     public class AccountService : IAccountService
     {
         private static Logger log = LogManager.GetCurrentClassLogger();
+        private readonly IApplicationSettingsService applicationSettingsService;
         private readonly IUnitOfWork unitOfWork;
 
         //private readonly AdoptMeDataContext dataContext;
@@ -21,8 +23,9 @@
         private readonly RoleManager<Role> roleManager;
         private readonly IMapper mapper;
 
-        public AccountService(/*AdoptMeDataContext dataContext*/IUnitOfWork unitOfWork,UserManager<User> userManager,SignInManager<User> signInManager,RoleManager<Role> roleManager,IMapper mapper)
+        public AccountService(/*AdoptMeDataContext dataContext*/IApplicationSettingsService applicationSettingsService,IUnitOfWork unitOfWork,UserManager<User> userManager,SignInManager<User> signInManager,RoleManager<Role> roleManager,IMapper mapper)
         {
+            this.applicationSettingsService = applicationSettingsService;
             this.unitOfWork = unitOfWork;
             //this.dataContext = dataContext;
             this.userManager = userManager;

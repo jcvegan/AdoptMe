@@ -5,6 +5,7 @@
     using System.Net;
     using System.Text;
     using System.Threading.Tasks;
+    using AdoptMe.Application.Services.Definition.App;
     using AdoptMe.Application.Services.Definition.Pets;
     using AdoptMe.Application.Services.Definition.Security;
     using AdoptMe.Application.Services.Implementation.Pets;
@@ -13,9 +14,8 @@
     using AdoptMe.Data.Domains.Security;
     using AdoptMe.Data.Repository.Definition;
     using AdoptMe.Data.Repository.Implementation;
-    using AdoptMe.Presentation.Api.Auth;
-    using AdoptMe.Presentation.Api.Helpers;
-    using AdoptMe.Presentation.Api.Options;
+    using AdoptMe.Presentation.Api.Extension.Settings;
+    using AdoptMe.Presentation.Api.Options.App;
     using AdoptMe.Presentation.Api.Provider;
     using AutoMapper;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -35,9 +35,6 @@
 
     public class Startup
     {
-        //private const string SecretKey = "iNivDmHLpUA223sqsfhqGbMRdRj1PVkH"; // todo: get this from somewhere secure
-        //private readonly SymmetricSecurityKey _signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(SecretKey));
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -51,7 +48,6 @@
             ConfigureCors(services);
             ConfigureAuthorization(services);
             ConfigureIdentity(services);
-            //ConfigureEntityFramework(services);
             services.ConfigureApplicationCookie(options => {
                 options.Events.OnRedirectToLogin = context => {
                     context.Response.Headers["Location"] = context.RedirectUri;
@@ -62,6 +58,7 @@
             ConfigureAuthentication(services);
 
             services.AddAutoMapper();
+            ConfigureOptions(services);
             ConfigureDependencyInjection(services);
             services.AddMvc();
             services.Configure<MvcOptions>(options =>
@@ -157,6 +154,7 @@
             services.AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddTransient<IAccountService, AccountService>();
             services.AddTransient<IPetTypeService, PetTypeService>();
+            services.AddTransient<IApplicationSettingsService, ApplicationSettingsService>();
         }
         private void ConfigureIdentity(IServiceCollection services)
         {
@@ -179,6 +177,11 @@
             .AddEntityFrameworkStores<AdoptMeDataContext>()
             .AddDefaultTokenProviders();
             services.AddDbContext<AdoptMeDataContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("AdoptMe"), opts => opts.CommandTimeout(90)));
+        }
+        private void ConfigureOptions(IServiceCollection services)
+        {
+            services.Configure<EmailSettings>(nameof(EmailSettings), Configuration);
+            services.Configure<TemplateSettings>(nameof(TemplateSettings), Configuration);
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
