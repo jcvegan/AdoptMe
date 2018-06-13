@@ -1,6 +1,7 @@
 import React, {PropTypes} from 'react';
 import {connect} from 'react-redux';
 import uikit from '../../../node_modules/uikit/dist/js/uikit';
+import uikitIcons from '../../../node_modules/uikit/dist/js/uikit-icons';
 import * as accountActions from '../../actions/accountActions';
 
 class NewAccountPage extends React.Component {
@@ -14,9 +15,16 @@ class NewAccountPage extends React.Component {
                 lastName:"",
                 password:"",
                 passwordConfirmation:""
+            },
+            validation: {
+                userName:false,
+                eMail:false,
+                firstName:false,
+                lastName:false,
+                password:false,
+                passwordConfirmation:false
             }
         };
-        this.isValid = false;
         this.onUsernameChange = this.onUsernameChange.bind(this);
         this.onFirstNameChange = this.onFirstNameChange.bind(this);
         this.onLastNameChange = this.onLastNameChange.bind(this);
@@ -28,19 +36,30 @@ class NewAccountPage extends React.Component {
 
     onUsernameChange(event){
         const account = this.state.account;
+        //const isValid = this.state.isValid;
         account.userName = event.target.value;
         this.setState({account: account});
+        this.props.validateUser(account);
     }
     onEmailChange(event){
         const account = this.state.account;
+        //const isValid = this.state.isValid;
         account.eMail = event.target.value;
         this.setState({account: account});
+        this.props.validateEmail(account);
     }
 
     onFirstNameChange(event){
         const account = this.state.account;
         account.firstName = event.target.value;
         this.setState({account: account});
+        if(account.firstName.length > 0){
+            this.setState({
+                validation: {
+                    firstName:true
+                }
+            });
+        }
     }
     onLastNameChange(event){
         const account = this.state.account;
@@ -55,12 +74,12 @@ class NewAccountPage extends React.Component {
     onPasswordConfirmationChange(event){
         const account = this.state.account;
         account.passwordConfirmation = event.target.value;
+        if(account.password != account.passwordConfirmation){
+            account.isValid = false;
+        }
         this.setState({account: account});
     }
     onClickSave(){
-        //alert(this.state.eMail);
-        //this.props.dispatch(accountActions.createAccount(this.state));
-        //console.log(this.props);
         this.props.createAccount(this.state.account);
     }
 
@@ -84,12 +103,12 @@ class NewAccountPage extends React.Component {
                             <input className="uk-input" type="text" placeholder="Apellidos" value={this.state.account.lastName} onChange={this.onLastNameChange}></input>
                         </div>
                     </div>
-                    <div className="uk-width-1-1 uk-margin-bottom">
+                    <div className="uk-width-1-1 uk-grid-margin">
                         <div className="uk-inline uk-width-1-1">
                             <input className="uk-input" type="text" placeholder="Usuario" value={this.state.account.userName} onChange={this.onUsernameChange}></input>
                         </div>
                     </div>
-                    <div className="uk-width-1-1 uk-margin-bottom">
+                    <div className="uk-width-1-1 uk-grid-margin">
                         <div className="uk-inline uk-width-1-1">
                             <input className="uk-input" type="text" placeholder="Correo Electrónico" value={this.state.account.eMail} onChange={this.onEmailChange}></input>
                         </div>
@@ -105,7 +124,7 @@ class NewAccountPage extends React.Component {
                         </div>
                     </div>
                     <div className="uk-width-1-1">
-                        <button type="button" className="uk-button uk-button-primary" onClick={this.onClickSave}>Registrame</button>
+                        <button type="button" className="uk-button uk-button-primary" disabled={(!this.state.validation.eMail && !this.state.validation.firstName && !this.state.validation.lastName && !this.state.validation.password && !this.state.validation.passwordConfirmation)} onClick={this.onClickSave}>Registrame</button>
                     </div>
                 </form>
             </div>
@@ -115,19 +134,26 @@ class NewAccountPage extends React.Component {
 
 NewAccountPage.propTypes = {
     //dispatch:PropTypes.func.isRequired,
-    createAccount:PropTypes.func.isRequired
+    createAccount:PropTypes.func.isRequired,
+    validateUser:PropTypes.func.isRequired,
+    validateEmail:PropTypes.func.isRequired
 };
 function mapStateToProps(state,ownProps){
     return {
-        accounts:state.accounts
+        account:state.account,
+        validation:state.validation
     };
 }
 function mapDispatchToProps(dispatch){
     return {
         createAccount : account => { 
-            console.log(account);
-            uikit.notification("Creando cuenta...",{status:"primary"});
             dispatch(accountActions.createAccount(account));
+        },
+        validateUser: (account) => {
+            dispatch(accountActions.validateUsername(account));
+        },
+        validateEmail: (account) => {
+            dispatch(accountActions.validateEmail(account));
         }
     };
 }

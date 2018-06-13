@@ -17,15 +17,15 @@
         }
         public async Task NotifyByEmail(string subject, IEnumerable<MailAddress> to, string templateName, XDocument parameters)
         {
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
         }
 
         public async Task NotifyByEmail(string subject, IEnumerable<MailAddress> to, MailAddress from, string templateName, XDocument parameters)
         {
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
         }
 
-        private async Task<string> GetTemplateContentAsync(string templateName,XDocument parameters)
+        private async Task<string> GetTemplateContentAsync(string templateName, XDocument parameters)
         {
             var templatePathTask = applicationSettingsService.GetTemplatePathAsync(templateName);
             string compileResult = string.Empty;

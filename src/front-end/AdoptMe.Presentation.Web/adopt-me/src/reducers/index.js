@@ -1,8 +1,8 @@
 import {combineReducers} from 'redux';
-import accounts from './accountReducer';
+import account from './accountReducer';
 import petTypes from './petTypeReducers';
 const rootReducer = combineReducers({
-    accounts: accounts,
+    account: account,
     petTypes: petTypes
 });
 

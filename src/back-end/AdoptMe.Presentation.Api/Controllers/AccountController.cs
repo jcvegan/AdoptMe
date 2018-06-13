@@ -4,9 +4,7 @@
     using AdoptMe.Application.Services.Definition.Security;
     using AdoptMe.Data.Container.Context;
     using AdoptMe.Data.Domains.Security;
-    using AdoptMe.Presentation.Api.Auth;
     using AdoptMe.Presentation.Api.Models.Account;
-    using AdoptMe.Presentation.Api.Options;
     using AdoptMe.Presentation.Api.Utils;
     using AutoMapper;
     using Microsoft.AspNetCore.Authorization;
@@ -14,9 +12,8 @@
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.Options;
     using System;
-    using System.Security.Claims;
+    using System.Linq;
     using System.Threading.Tasks;
 
     [Route("api/account")]
@@ -43,13 +40,26 @@
 
         [Route("create")]
         [HttpPost]
-        public IActionResult CreateAccount([FromBody] NewAccountModel model)
+        public async Task<IActionResult> CreateAccount([FromBody] NewAccountModel model)
         {
             try
             {
                 if (ModelState.IsValid)
-                    return Ok(this.accountService.CreateAccountAsync(mapper.Map<UserDto>(model), model.Password));
-                return BadRequest();
+                {
+                    var result = await this.accountService.CreateAccountAsync(mapper.Map<UserDto>(model), model.Password);
+                    if (result.Succeeded)
+                    {
+                        return Ok(new { Succeeded=true });
+                    }
+                    else
+                    {
+                        return BadRequest(new { Errors = result.Errors.Select(e => e.Description) });
+                    }
+                }
+                var errors = ModelState.SelectMany(x => x.Value.Errors)
+                    .Select(e => e.ErrorMessage)
+                           .ToList();
+                return BadRequest(new { Errors = errors });
             }
             catch (Exception exc)
             {
@@ -72,13 +82,15 @@
             }
         }
 
-        [Route("{email}/validateEmail")]
+        [Route("{model.Email}/validateEmail")]
         [HttpGet]
-        public async Task<IActionResult> ValidateEmail(string email)
+        public async Task<IActionResult> ValidateEmail(ValidateEmailModel model)
         {
             try
             {
-                var existsEmail = await accountService.IsEmailAssociatedAsync(email);
+                if (!ModelState.IsValid)
+                    throw new Exception();
+                var existsEmail = await accountService.IsEmailAssociatedAsync(model.Email);
                 return new ObjectResult(new { IsValid = !existsEmail });
             }
             catch (Exception exc)

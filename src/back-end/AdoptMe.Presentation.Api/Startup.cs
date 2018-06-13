@@ -6,10 +6,14 @@
     using System.Text;
     using System.Threading.Tasks;
     using AdoptMe.Application.Services.Definition.App;
+    using AdoptMe.Application.Services.Definition.Factory;
     using AdoptMe.Application.Services.Definition.Pets;
     using AdoptMe.Application.Services.Definition.Security;
+    using AdoptMe.Application.Services.Definition.Utils;
+    using AdoptMe.Application.Services.Implementation.Factory;
     using AdoptMe.Application.Services.Implementation.Pets;
     using AdoptMe.Application.Services.Implementation.Security;
+    using AdoptMe.Application.Services.Implementation.Utils;
     using AdoptMe.Data.Container.Context;
     using AdoptMe.Data.Domains.Security;
     using AdoptMe.Data.Repository.Definition;
@@ -155,6 +159,8 @@
             services.AddTransient<IAccountService, AccountService>();
             services.AddTransient<IPetTypeService, PetTypeService>();
             services.AddTransient<IApplicationSettingsService, ApplicationSettingsService>();
+            services.AddTransient<IEmailService, EmailService>();
+            services.AddTransient<ITemplateFactory, TemplateFactory>();
         }
         private void ConfigureIdentity(IServiceCollection services)
         {
@@ -182,6 +188,7 @@
         {
             services.Configure<EmailSettings>(nameof(EmailSettings), Configuration);
             services.Configure<TemplateSettings>(nameof(TemplateSettings), Configuration);
+            services.Configure<AppSettings>(nameof(AppSettings), Configuration);
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

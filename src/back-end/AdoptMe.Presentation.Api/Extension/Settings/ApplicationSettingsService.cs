@@ -39,7 +39,7 @@
                 return new SmtpClient(emailSettings.Value.Host, emailSettings.Value.Port)
                 {
                     EnableSsl = emailSettings.Value.EnableSsl,
-                    Credentials = new NetworkCredential(emailSettings.Value.Username, emailSettings.Value.Passwor)
+                    Credentials = new NetworkCredential(emailSettings.Value.Username, emailSettings.Value.Password)
                 };
             }
             catch(Exception exc)
